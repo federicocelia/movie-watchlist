@@ -8,22 +8,24 @@
     <link rel="stylesheet" type="text/css" href="./style.css" />
   </head>
   <body>
-    <label for="movie-search">Movie</label>
-    <input type="text" name="movie-search" id="movie-search" required />
-    <label for="movie-Year">Year</label>
-    <input
-      type="text"
-      name="movie-Year"
-      id="movie-Year"
-      type="number"
-      min="1900"
-      max="2200"
-      pattern="[0-9]{4}"
-      maxlength="4"
-    />
-    <label for="full-plot">Full Plot</label>
-    <input type="checkbox" id="full-plot" name="full-plot" />
-    <button type="submit" class="searchBtn">Search Movie</button>
+    <form id="search-form">
+      <label for="movie-search">Movie</label>
+      <input type="text" name="movie-search" id="movie-search" required />
+      <label for="movie-Year">Year</label>
+      <input
+        type="text"
+        name="movie-Year"
+        id="movie-Year"
+        type="number"
+        min="1900"
+        max="2200"
+        pattern="[0-9]{4}"
+        maxlength="4"
+      />
+      <label for="full-plot">Full Plot</label>
+      <input type="checkbox" id="full-plot" name="full-plot" />
+      <button type="submit" class="searchBtn">Search Movie</button>
+    </form>
 
     <section class="movie-list-section">
       <ul class="movie-list">
