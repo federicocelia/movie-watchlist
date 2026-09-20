@@ -10,6 +10,14 @@ const movies = [];
 // Stores movies explicitly added by the user to the watchlist.
 const watchListMovies = [];
 
+// Restore saved watchlist from localStorage.
+// Falls back to an empty array if no saved data exists.
+const savedWatchlist =
+  JSON.parse(localStorage.getItem("watchlistMovies")) || [];
+
+// Load saved movies into the current watchlist array.
+watchListMovies.push(...savedWatchlist);
+
 // Allows instant access to a movie object by imdbID.
 const movieLookup = new Map();
 
@@ -158,3 +166,24 @@ function createMovieCard(movie) {
   </li>
   `;
 }
+
+movieList.addEventListener("click", (event) => {
+  //console.log(event.target);
+  if (!event.target.matches(".add-to-watchlist-btn")) return;
+
+  const imdbID = event.target.dataset.imdbid; //
+
+  const movieToAddWatchlist = movieLookup.get(imdbID);
+  // console.log(movieToAddWatchlist.imdbID);
+  if (
+    watchListMovies.some((movie) => movie.imdbID === movieToAddWatchlist.imdbID)
+  ) {
+    console.log("already in the watchlist");
+    return;
+  } else {
+    watchListMovies.push(movieToAddWatchlist);
+    console.log(watchListMovies);
+
+    localStorage.setItem("watchlistMovies", JSON.stringify(watchListMovies));
+  }
+});
