@@ -8,6 +8,54 @@
     <link rel="stylesheet" type="text/css" href="./style.css" />
   </head>
   <body>
+    <label for="movie-search">Movie</label>
+    <input type="text" name="movie-search" id="movie-search" required />
+    <label for="movie-Year">Year</label>
+    <input
+      type="text"
+      name="movie-Year"
+      id="movie-Year"
+      type="number"
+      min="1900"
+      max="2200"
+      pattern="[0-9]{4}"
+      maxlength="4"
+    />
+    <label for="full-plot">Full Plot</label>
+    <input type="checkbox" id="full-plot" name="full-plot" />
+    <button type="submit" class="searchBtn">Search Movie</button>
+
+    <section class="movie-list-section">
+      <ul class="movie-list">
+        <li class="movie-card" id="" data-imdbid="${imdbID}">
+          <img alt="poster-image-of-${movie.title}" src="" />
+          <div class="movie-section-details">
+            <div class="movie-header">
+              <h3 class="movie-title">Movie Title</h3>
+              <p class="movie-rating">Rating</p>
+            </div>
+            <div class="movie-meta">
+              <p class="movie-runtime">164min</p>
+              <p class="movie-genre">Sci-fi</p>
+              <div class="watchlist-container">
+                <button class="add-to-watchlist-btn" data-imdbid="${imdbID}">
+                  +
+                </button>
+                <p class="add-to-watchlist-highlight">Watchlist</p>
+              </div>
+            </div>
+            <div class="movie-description">
+              <p class="movie-plot">
+                Young Blade Runner K's discovery of a long-buried secret leads
+                him to track down former Blade Runner Rick Deckard, who's been
+                missin...
+              </p>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
     <script src="./script.js"></script>
   </body>
 </html>
