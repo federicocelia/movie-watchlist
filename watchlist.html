@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Watchlist</title>
+    <meta name="author" content="Federico Celia" />
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+  </head>
+  <body>
+    <form id="search-form">
+      <label for="movie-search">Movie</label>
+      <input type="text" name="movie-search" id="movie-search" required />
+      <label for="movie-Year">Year</label>
+      <input
+        type="text"
+        name="movie-Year"
+        id="movie-Year"
+        type="number"
+        min="1900"
+        max="2200"
+        pattern="[0-9]{4}"
+        maxlength="4"
+      />
+      <label for="full-plot">Full Plot</label>
+      <input type="checkbox" id="full-plot" name="full-plot" />
+      <button type="submit" class="searchBtn">Search Movie</button>
+    </form>
+
+    <section class="movie-list-section">
+      <ul class="movie-list">
+        <!-- movie list load here -->
+      </ul>
+    </section>
+
+    <script type="module" src="./watchlist.js"></script>
+  </body>
+</html>
