@@ -1,10 +1,12 @@
-export function renderMovies(arrayOfMovies) {
+export function renderMovies(arrayOfMovies, isWatchlistPage = false) {
   // Transform each movie object into an HTML string
   // and merge all strings into one large HTML fragment.
-  return arrayOfMovies.map(createMovieCard).join("");
+  return arrayOfMovies
+    .map((movie) => createMovieCard(movie, isWatchlistPage))
+    .join("");
 }
 
-export function createMovieCard(movie) {
+export function createMovieCard(movie, isWatchlistPage = false) {
   // Destructuring movie
   const {
     Genre,
@@ -17,6 +19,20 @@ export function createMovieCard(movie) {
     imdbID,
     imdbRating,
   } = movie;
+
+  const buttonHTML = isWatchlistPage
+    ? `
+      <button class="remove-from-watchlist-btn" data-imdbid="${imdbID}">
+        -
+      </button>
+      <p class="remove-from-watchlist-highlight">Watchlist</p>
+    `
+    : `
+      <button class="add-to-watchlist-btn" data-imdbid="${imdbID}">
+        +
+      </button>
+      <p class="add-to-watchlist-highlight">Watchlist</p>
+    `;
 
   return `
            <li class="movie-card" id="${imdbID}" data-imdbid="${imdbID}">
@@ -34,10 +50,7 @@ export function createMovieCard(movie) {
         <p class="movie-runtime">${Runtime}</p>
         <p class="movie-genre">${Genre}</p>
         <div class="watchlist-container">
-          <button class="add-to-watchlist-btn" data-imdbid="${imdbID}">
-            +
-          </button>
-          <p class="add-to-watchlist-highlight">Watchlist</p>
+          ${buttonHTML}
         </div>
       </div>
       <div class="movie-description">
