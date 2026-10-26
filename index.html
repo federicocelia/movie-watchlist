@@ -14,7 +14,13 @@
     </header>
     <form id="search-form">
       <label for="movie-search">Movie</label>
-      <input type="text" name="movie-search" id="movie-search" required />
+      <input
+        type="text"
+        name="movie-search"
+        id="movie-search"
+        placeholder="Batman"
+        required
+      />
       <label for="movie-Year">Year</label>
       <input
         type="text"
@@ -25,9 +31,10 @@
         max="2200"
         pattern="[0-9]{4}"
         maxlength="4"
+        placeholder="2005"
       />
       <label for="full-plot">Full Plot</label>
-      <input type="checkbox" id="full-plot" name="full-plot" />
+
       <button type="submit" class="searchBtn">Search Movie</button>
     </form>
 

@@ -10,9 +10,11 @@
   <body>
     <header>
       <a href="/index.html"><h1 class="main-title">Find your film</h1></a>
-      <button class="watchlist-movie-search-btn">My Watchlist</button>
+      <button id="toggle-search-btn" class="watchlist-movie-search-btn">
+        Search Movies
+      </button>
     </header>
-    <form id="search-form">
+    <form id="search-form" class="hidden">
       <label for="movie-search">Movie</label>
       <input type="text" name="movie-search" id="movie-search" required />
       <label for="movie-Year">Year</label>

@@ -88,3 +88,13 @@ movieList?.addEventListener("click", (event) => {
 });
 
 renderWatchlist();
+
+const toggleSearchBtn = document.querySelector(".watchlist-movie-search-btn");
+
+const searchForm = document.querySelector("#search-form");
+
+if (toggleSearchBtn && searchForm) {
+  toggleSearchBtn.addEventListener("click", () => {
+    searchForm.classList.toggle("hidden");
+  });
+}
