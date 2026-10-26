@@ -1,5 +1,6 @@
 import { renderMovies } from "./utils.js";
 import { addToWatchlist } from "./watchlist.js";
+import { searchMovies, getMovieDetails } from "./api.js";
 
 const searchForm = document.querySelector("#search-form");
 const searchBtn = document.querySelector(".searchBtn");
@@ -7,109 +8,128 @@ const movieList = document.querySelector(".movie-list");
 const movieSearchInput = document.querySelector("#movie-search");
 const movieYearInput = document.querySelector("#movie-Year");
 
-// Stores the full details of the movies returned by the latest search.
-const movies = [];
-
-// Allows instant access to a movie object by imdbID.
+/**
+ * Allows instant access to a movie object by imdbID.
+ *
+ * Example:
+ * movieLookup.get("tt0137523")
+ */
 const movieLookup = new Map();
 
-searchForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  // Read the current values from the search form.
-  const searchTerm = movieSearchInput.value;
-  const searchYear = movieYearInput.value;
+/**
+ * Render a loading state while searching.
+ */
+function renderLoadingState() {
+  movieList.innerHTML = `
+    <div class="loading">
+      <p>Searching movies...</p>
+    </div>
+  `;
+}
 
-  // Search endpoint:
-  // OMDb returns a list of matching movies when searching by title.
-  let url1 = `http://localhost:3000/api/omdb?s=${searchTerm}`;
+/**
+ * Render an error message.
+ */
+function renderErrorMessage(
+  title = "Something went wrong",
+  message = "Please try again.",
+) {
+  movieList.innerHTML = `
+    <div class="search-error">
+      <h3>${title}</h3>
+      <p>${message}</p>
+    </div>
+  `;
+}
 
-  // Add the year filter only if the user supplied one.
-  if (searchYear) {
-    url1 += `&y=${searchYear}`;
+/**
+ * Handle movie search.
+ */
+searchForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const searchTerm = movieSearchInput.value.trim();
+  const searchYear = movieYearInput.value.trim();
+
+  if (!searchTerm) {
+    renderErrorMessage("Missing Search", "Please enter a movie title.");
+
+    return;
   }
 
   try {
-    // First request:
-    // Retrieve the list of movies matching the search term.
-    //
-    // Important:
-    // This endpoint does NOT return all available movie properties.
-    // It only returns a subset of information, including imdbID.
-    const response = await fetch(url1);
-    const data = await response.json();
+    searchBtn.disabled = true;
 
-    // If OMDb returns no matches, use an empty array to avoid errors
-    // when later mapping over the results.
-    const movieArray = data.Search || [];
+    renderLoadingState();
 
-    //if search produce no result, message to be displayed
-    if (data.Response === "False") {
-      movieList.innerHTML = `
-    <div class="search-error">
-      <h3>No results found</h3>
-      <p>
-        Unable to find what you're looking for.
-        Please try another search.
-      </p>
-    </div>
-  `;
+    /**
+     * Search for matching movies.
+     */
+    const searchResults = await searchMovies(searchTerm, searchYear);
+
+    if (searchResults.Response === "False") {
+      renderErrorMessage(
+        "No Results Found",
+        "Unable to find what you're looking for. Please try another search.",
+      );
+
       return;
     }
-    // Reuse the existing array while removing data from previous searches.
-    movies.length = 0;
 
-    // Second request:
-    //
-    // For each result we use its imdbID to request the complete movie data.
-    //
-    // Promise.all executes all requests in parallel, making the search much
-    // faster than fetching each movie one-by-one inside a loop.
+    /**
+     * Retrieve full details for each movie.
+     */
     const fullMovieDetails = await Promise.all(
-      movieArray.map(async (movie) => {
-        const response = await fetch(
-          `http://localhost:3000/api/omdb?i=${movie.imdbID}`,
-        );
-
-        return response.json();
-      }),
+      searchResults.Search.map((movie) => getMovieDetails(movie.imdbID)),
     );
 
-    // Populate the search results array with the fully detailed movie objects.
-    movies.push(...fullMovieDetails);
-
-    // Rebuild the lookup map so it only contains movies
-    // from the current search results.
+    /**
+     * Refresh lookup map.
+     */
     movieLookup.clear();
 
-    // Structure:
-    //
-    // imdbID -> movie object
-    //
-    // Example:
-    // "tt0780504" => { Title: "Drive", ... }
     fullMovieDetails.forEach((movie) => {
       movieLookup.set(movie.imdbID, movie);
     });
 
-    // Convert the movie objects into HTML and render them
-    // in a single DOM update for better performance.
-    movieList.innerHTML = renderMovies(movies);
+    /**
+     * Render search results.
+     */
+    movieList.innerHTML = renderMovies(fullMovieDetails);
+
+    /**
+     * Reset form after a successful search.
+     */
     searchForm.reset();
   } catch (error) {
-    // Display a user-friendly message while still logging
-    // the real error for debugging.
-    console.error(error);
+    console.error("Movie search failed:", error);
 
-    movieList.innerHTML = "<p>Something went wrong. Please try again.</p>";
+    renderErrorMessage(
+      "Search Failed",
+      "Unable to retrieve movie data at the moment.",
+    );
+  } finally {
+    searchBtn.disabled = false;
   }
 });
 
+/**
+ * Handle add-to-watchlist clicks using event delegation.
+ */
 movieList.addEventListener("click", (event) => {
-  if (!event.target.matches(".add-to-watchlist-btn")) return;
+  if (!event.target.matches(".add-to-watchlist-btn")) {
+    return;
+  }
 
-  const imdbID = event.target.dataset.imdbid;
+  const { imdbid } = event.target.dataset;
 
-  const movieToAddWatchlist = movieLookup.get(imdbID);
+  const movie = movieLookup.get(imdbid);
 
-  addToWatchlist(movieToAddWatchlist);
+  if (!movie) {
+    console.error(`Movie ${imdbid} not found in lookup map.`);
+
+    return;
+  }
+
+  addToWatchlist(movie);
 });

@@ -1,46 +1,90 @@
 import { renderMovies } from "./utils.js";
+import { getWatchlist, saveWatchlist } from "./storage.js";
+import { showNotification } from "./notifications.js";
 
 const movieList = document.querySelector(".movie-list");
 
-const watchListMovies =
-  JSON.parse(localStorage.getItem("watchlistMovies")) || [];
+/**
+ * Render current watchlist.
+ */
+function renderWatchlist() {
+  const movies = getWatchlist();
 
-movieList.innerHTML = renderMovies(watchListMovies, true);
+  if (!movies.length) {
+    movieList.innerHTML = `
+      <div class="empty-watchlist">
+        <h3>Your watchlist is empty</h3>
+        <p>Add some movies to get started.</p>
+      </div>
+    `;
 
-movieList.addEventListener("click", (event) => {
-  if (!event.target.matches(".remove-from-watchlist-btn")) return;
+    return;
+  }
 
-  const imdbID = event.target.dataset.imdbid;
-
-  const updatedWatchlist = removeFromWatchlist(imdbID);
-
-  movieList.innerHTML = renderMovies(updatedWatchlist, true);
-});
-
-export function addToWatchlist(movie) {
-  const watchListMovies =
-    JSON.parse(localStorage.getItem("watchlistMovies")) || [];
-
-  const alreadyExists = watchListMovies.some(
-    (watchlistMovie) => watchlistMovie.imdbID === movie.imdbID,
-  );
-
-  if (alreadyExists) return;
-
-  watchListMovies.push(movie);
-
-  localStorage.setItem("watchlistMovies", JSON.stringify(watchListMovies));
+  movieList.innerHTML = renderMovies(movies, true);
 }
 
+/**
+ * Add movie to watchlist.
+ */
+export function addToWatchlist(movie) {
+  const watchlist = getWatchlist();
+
+  const alreadyExists = watchlist.some((item) => item.imdbID === movie.imdbID);
+
+  if (alreadyExists) {
+    showNotification(
+      `"${movie.Title}" is already in your watchlist.`,
+      "warning",
+    );
+
+    return;
+  }
+
+  watchlist.push(movie);
+
+  if (saveWatchlist(watchlist)) {
+    showNotification(`"${movie.Title}" added to watchlist.`, "success");
+  } else {
+    showNotification("Unable to save watchlist.", "error");
+  }
+}
+
+/**
+ * Remove movie from watchlist.
+ */
 function removeFromWatchlist(imdbID) {
-  const watchListMovies =
-    JSON.parse(localStorage.getItem("watchlistMovies")) || [];
+  const watchlist = getWatchlist();
 
-  const updatedWatchlist = watchListMovies.filter(
-    (movie) => movie.imdbID !== imdbID,
-  );
+  const movieToRemove = watchlist.find((movie) => movie.imdbID === imdbID);
 
-  localStorage.setItem("watchlistMovies", JSON.stringify(updatedWatchlist));
+  const updatedWatchlist = watchlist.filter((movie) => movie.imdbID !== imdbID);
+
+  if (saveWatchlist(updatedWatchlist)) {
+    showNotification(
+      `"${movieToRemove?.Title ?? "Movie"}" removed from watchlist.`,
+      "success",
+    );
+  } else {
+    showNotification("Unable to update watchlist.", "error");
+  }
 
   return updatedWatchlist;
 }
+
+/**
+ * Event delegation for remove buttons.
+ */
+movieList?.addEventListener("click", (event) => {
+  if (!event.target.matches(".remove-from-watchlist-btn")) {
+    return;
+  }
+
+  const { imdbid } = event.target.dataset;
+
+  removeFromWatchlist(imdbid);
+
+  renderWatchlist();
+});
+
+renderWatchlist();
