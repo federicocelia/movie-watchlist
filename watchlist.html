@@ -14,9 +14,15 @@
         Search Movies
       </button>
     </header>
-    <form id="search-form" class="hidden">
+    <form id="search-form">
       <label for="movie-search">Movie</label>
-      <input type="text" name="movie-search" id="movie-search" required />
+      <input
+        type="text"
+        name="movie-search"
+        id="movie-search"
+        placeholder="Batman"
+        required
+      />
       <label for="movie-Year">Year</label>
       <input
         type="text"
@@ -27,9 +33,10 @@
         max="2200"
         pattern="[0-9]{4}"
         maxlength="4"
+        placeholder="2005"
       />
       <label for="full-plot">Full Plot</label>
-      <input type="checkbox" id="full-plot" name="full-plot" />
+
       <button type="submit" class="searchBtn">Search Movie</button>
     </form>
 
@@ -38,6 +45,14 @@
         <!-- movie list load here -->
       </ul>
     </section>
+
+    <div id="search-modal" class="modal hidden">
+      <div class="modal-content">
+        <button id="close-modal-btn" class="close-modal-btn">×</button>
+
+        <ul class="modal-movie-list"></ul>
+      </div>
+    </div>
 
     <script type="module" src="./watchlist.js"></script>
   </body>

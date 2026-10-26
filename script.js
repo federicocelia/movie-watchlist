@@ -1,135 +1,31 @@
-import { renderMovies } from "./utils.js";
-import { addToWatchlist } from "./watchlist.js";
-import { searchMovies, getMovieDetails } from "./api.js";
-
-const searchForm = document.querySelector("#search-form");
-const searchBtn = document.querySelector(".searchBtn");
-const movieList = document.querySelector(".movie-list");
-const movieSearchInput = document.querySelector("#movie-search");
-const movieYearInput = document.querySelector("#movie-Year");
-
 /**
- * Allows instant access to a movie object by imdbID.
+ * script.js
  *
- * Example:
- * movieLookup.get("tt0137523")
+ * Entry point for index.html.
+ *
+ * Responsibilities:
+ * - Bootstrap movie search functionality.
+ * - Configure the search page with the default behavior.
+ *
+ * Search results on index.html are rendered directly
+ * into the page's movie list container.
+ *
+ * Contrast this with watchlist.html:
+ * - watchlist.js initializes the same search module
+ * - search results are displayed inside a modal
+ *
+ * By keeping initialization separate, both pages can
+ * reuse the same search implementation while providing
+ * different user experiences.
  */
-const movieLookup = new Map();
+
+import { initializeSearch } from "./search.js";
 
 /**
- * Render a loading state while searching.
+ * Initialize standard search behavior.
+ *
+ * No custom callback is provided,
+ * therefore search.js will render
+ * search results directly into the page.
  */
-function renderLoadingState() {
-  movieList.innerHTML = `
-    <div class="loading">
-      <p>Searching movies...</p>
-    </div>
-  `;
-}
-
-/**
- * Render an error message.
- */
-function renderErrorMessage(
-  title = "Something went wrong",
-  message = "Please try again.",
-) {
-  movieList.innerHTML = `
-    <div class="search-error">
-      <h3>${title}</h3>
-      <p>${message}</p>
-    </div>
-  `;
-}
-
-/**
- * Handle movie search.
- */
-searchForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const searchTerm = movieSearchInput.value.trim();
-  const searchYear = movieYearInput.value.trim();
-
-  if (!searchTerm) {
-    renderErrorMessage("Missing Search", "Please enter a movie title.");
-
-    return;
-  }
-
-  try {
-    searchBtn.disabled = true;
-
-    renderLoadingState();
-
-    /**
-     * Search for matching movies.
-     */
-    const searchResults = await searchMovies(searchTerm, searchYear);
-
-    if (searchResults.Response === "False") {
-      renderErrorMessage(
-        "No Results Found",
-        "Unable to find what you're looking for. Please try another search.",
-      );
-
-      return;
-    }
-
-    /**
-     * Retrieve full details for each movie.
-     */
-    const fullMovieDetails = await Promise.all(
-      searchResults.Search.map((movie) => getMovieDetails(movie.imdbID)),
-    );
-
-    /**
-     * Refresh lookup map.
-     */
-    movieLookup.clear();
-
-    fullMovieDetails.forEach((movie) => {
-      movieLookup.set(movie.imdbID, movie);
-    });
-
-    /**
-     * Render search results.
-     */
-    movieList.innerHTML = renderMovies(fullMovieDetails);
-
-    /**
-     * Reset form after a successful search.
-     */
-    searchForm.reset();
-  } catch (error) {
-    console.error("Movie search failed:", error);
-
-    renderErrorMessage(
-      "Search Failed",
-      "Unable to retrieve movie data at the moment.",
-    );
-  } finally {
-    searchBtn.disabled = false;
-  }
-});
-
-/**
- * Handle add-to-watchlist clicks using event delegation.
- */
-movieList.addEventListener("click", (event) => {
-  if (!event.target.matches(".add-to-watchlist-btn")) {
-    return;
-  }
-
-  const { imdbid } = event.target.dataset;
-
-  const movie = movieLookup.get(imdbid);
-
-  if (!movie) {
-    console.error(`Movie ${imdbid} not found in lookup map.`);
-
-    return;
-  }
-
-  addToWatchlist(movie);
-});
+initializeSearch();
