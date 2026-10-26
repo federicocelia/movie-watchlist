@@ -135,6 +135,7 @@ export function createMovieCard(movie, isWatchlistPage = false) {
           </h3>
 
           <p class="movie-rating">
+          <img src="./img/star.svg" alt="Star icon" class="star-icon">
             ${imdbRating}
           </p>
 
